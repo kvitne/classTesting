@@ -21,6 +21,7 @@ class Raster:
 
         # the file's new metadata
         self.toDir = self.unquote_text(toDir)
+        self.toDirQuoted = self.quote_text(toDir)
         self.toFilename = self.fromFilename.lower()
         self.toExt = self.fromExt.lower()
         self.toPath = os.path.join(self.toDir, self.toFilename + self.toExt)
@@ -58,8 +59,8 @@ class Raster:
         commentedText = '"%s"' % text
         return commentedText
 
-    def get_basename_fileext(self, currPath):
-        basename = os.path.basename(currPath)
+    def get_basename_fileext(self, filepath):
+        basename = os.path.basename(filepath)
         filename, ext = os.path.splitext(basename)
         return filename, ext
 
