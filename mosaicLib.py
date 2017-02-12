@@ -1,31 +1,38 @@
+import logging
 import time
 import os
-import logging
 import sys
 
 
 class Raster:
-    """Instantiate a raster-object, with necessary file-info"""
+    """Instantiate a raster-object with necessary file-info. Validates input."""
 
-    def __init__(self, currPath, toDir,
+    def __init__(self, fromPath, toDir,
                  toEpsg=25833,
                  fromEpsg=25833,
                  validExt='.tif',
                  indexName=None):
 
-        self.toEpsg = self.validate_epsg(toEpsg)
+        # the file's old/existing metadata
+        self.fromPath = self.unquote_text(fromPath)
+        self.fromPathQuoted = self.quote_text(fromPath)
         self.fromEpsg = self.validate_epsg(fromEpsg)
-        self.filename, self.ext = self.get_basename_fileext(currPath)
-        self.currPath = self.quote_text(currPath)
-        self.toDir = toDir
-        self.toPath = self.quote_text(self.create_toPath(toDir, self.filename, self.ext))
+        self.fromFilename, self.fromExt = self.get_basename_fileext(self.fromPath)
+
+        # the file's new metadata
+        self.toDir = self.unquote_text(toDir)
+        self.toFilename = self.fromFilename.lower()
+        self.toExt = self.fromExt.lower()
+        self.toPath = os.path.join(self.toDir, self.toFilename + self.toExt)
+        self.toPathQuoted = self.quote_text(self.toPath)
+        self.toEpsg = self.validate_epsg(toEpsg)
         self.validExt = self.validate_ext(validExt)
 
     def validate_epsg(self, epsg):
         try:
             epsg = int(epsg)
         except:
-            sys.exit('Epsg %s is not a valid int.' % epsg)
+            sys.exit('Epsg:  %s  is not a valid int.' % epsg)
         return epsg
 
     def validate_ext(self, ext):
@@ -33,8 +40,15 @@ class Raster:
             ext = '.' + ext
         if len(ext) != 4:
             sys.exit('The file-extension %s must contain 3 characters.' \
-                     ' "tif" is valid, "ti" is not.' % ext)
+                     ' "tif" or ".tif" is valid, "ti" or ".ti" is not.' % ext)
         return ext
+
+    def unquote_text(self, text):
+        if text.startswith(('"', "'")):
+            text = text[1:]
+        if text.endswith(('"', "'")):
+            text = text[:-1]
+        return text
 
     def quote_text(self, text):
         if text.startswith(('"', "'")):
@@ -49,10 +63,6 @@ class Raster:
         filename, ext = os.path.splitext(basename)
         return filename, ext
 
-    def create_toPath(self, toDir, basename, ext):
-        toPath = os.path.join(toDir, basename.lower() + ext.lower())
-        return toPath
-
 
 class Gdals:
     """Gdal-functions, the inputs should only be objects from the Raster-class"""
@@ -60,10 +70,10 @@ class Gdals:
     def translate(obj):
         print ('Working on %s' % obj)
         sys.stdout.flush()
-        run = "gdal_translate %s %s" % (obj.currPath, obj.toPath)
+        run = "gdal_translate %s %s" % (obj.fromPath, obj.toPath)
         # subprocess.call(run, shell=True)
         print (run)
-        time.sleep(3)
+        time.sleep(1)
 
     # def create_overviews(obj):
 
@@ -71,21 +81,21 @@ class Gdals:
 
     # def warp(obj):
 
+    # def warp_translate_overviews(obj):
+        """Used for sjokart"""
+
     # def create_indexes(obj):
 
-
-
-
-a = Raster('Test/rAster1.tif', 'teSt1')
+a = Raster('Test/rAster1.tif', 'tja/hmm')
 b = Raster('test/rAster2.tif', 'test2')
 c = Raster('test/rAster3.tif', 'test3')
 d = Raster('test/rAster4.tif', 'test4')
 objList = [a, b, c, d]
 
 print (a.toPath)
-print (a.currPath)
-print (a.ext)
-print (a.filename)
+print (a.fromPath)
+print (a.fromExt)
+print (a.fromFilename)
 
 import multiprocessing
 
