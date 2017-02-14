@@ -50,7 +50,7 @@ def get_filename_ext(filepath):
 
 class Raster:
     """Instantiate a raster-object with necessary file-info. Validates input.
-    Contains gdal-methods to work on the raster-objects.
+    Contains gdal-methods that works on the raster-objects.
     """
 
     def __init__(self, fromPath, toDir,
@@ -65,7 +65,7 @@ class Raster:
         self.fromPathQuoted = quote_text(fromPath)
         self.fromEpsg = validate_epsg(fromEpsg)
         self.fromFilename, self.fromExt = get_filename_ext(fromPath)
-        self.srcNoData = srcNoData
+        self.srcNoData = int(srcNoData)
 
         # the file's new metadata
         self.toDir = unquote_text(toDir)
@@ -75,7 +75,7 @@ class Raster:
         self.toPath = os.path.join(self.toDir, self.toFilename + self.toExt)
         self.toPathQuoted = quote_text(self.toPath)
         self.toEpsg = validate_epsg(toEpsg)
-        self.dstNoData = dstNoData
+        self.dstNoData = int(dstNoData)
         logging.debug('Created object %s with the following properties: %s' %
                       (self, vars(self)))
 
@@ -137,16 +137,16 @@ class Tileindex:
         pass
 
 
-a = Raster('Test/rAster1.tif', 'tja/hmm')
-b = Raster('test/rAster2.tif', 'test2')
+a = Raster('Test/rAster1.TIF', 'tja/hmm')
+b = Raster('test/rAsterøæå2.tif', 'test2')
 c = Raster('test/rAster3.tif', 'test3')
 d = Raster('test/rAster4.tif', 'test4')
 objList = [a, b, c, d]
 
 print (a.toPath)
 print (a.fromPath)
-print (a.fromExt)
-print (a.fromFilename)
+print (a.toExt)
+print (a.toFilename)
 
 import multiprocessing
 
